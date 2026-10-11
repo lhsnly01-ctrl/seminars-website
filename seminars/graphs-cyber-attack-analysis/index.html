@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>الرسوم البيانية ودورها في تحليل الهجمات السيبرانية</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <h1>الرسوم البيانية ودورها في تحليل الهجمات السيبرانية</h1>
+  <p class="en">Graphs and Their Role in Cyber Attack Analysis</p>
+  <div class="info">
+    إعداد الطلبة: علي حسن علي • فرقد حبيب عبدالله هادي<br>
+    جامعة المستقبل — كلية العلوم — قسم علوم الأمن السيبراني (المرحلة الثانية)<br>
+    المادة: هياكل البيانات
+  </div>
+  <div class="bar">
+    <a href="../../index.html">← العودة إلى الموقع الرئيسي</a>
+    <button type="button" onclick="window.print()">طباعة / حفظ PDF</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+<nav class="toc" aria-label="فهرس المحتويات">
+  <strong>المحتويات</strong>
+  <ol>
+    <li><a href="#intro">المقدمة (Introduction)</a></li>
+    <li><a href="#objectives">الأهداف الرئيسية</a></li>
+    <li><a href="#basics">أساسيات الرسوم البيانية في الشبكات</a></li>
+    <li><a href="#representation">تمثيل الشبكة (Network Graph Representation)</a></li>
+    <li><a href="#attack-path">تحليل مسار الهجوم (Attack Path Analysis)</a></li>
+    <li><a href="#algorithms">خوارزميات الاستكشاف BFS و DFS</a></li>
+    <li><a href="#python">تطبيق عملي بلغة بايثون</a></li>
+    <li><a href="#uses">الاستخدامات والحدود في الأمن السيبراني</a></li>
+    <li><a href="#conclusion">الخاتمة</a></li>
+    <li><a href="#references">المراجع</a></li>
+  </ol>
+</nav>
+
+<section id="intro">
+<h2>1. المقدمة (Introduction)</h2>
+<p>في عالم الأمن السيبراني الحديث، تواجه فرق التحقيق واستجابة الحوادث كميات هائلة من سجلات الشبكات والبيانات الواردة من الأجهزة والخوادم ونقاط النهاية (Workstations). يتمثل التحدي الأساسي في تعقيد العلاقات المتبادلة بين هذه الأنظمة، إذ غالباً ما ينتقل النشاط المشبوه أو البرمجيات الخبيثة (Malware) بخفية عبر أكثر من جهاز قبل الوصول إلى الهدف الحساس.</p>
+<p class="note"><strong>الفكرة الجوهرية:</strong> لتبسيط تحليل هذه الشبكات المعقدة نمثّل الأجهزة كعُقد (Nodes) والاتصالات وقنوات نقل البيانات كحواف (Edges) ضمن هيكل بيانات الرسم البياني (Graph). وهذا يتيح تطبيق خوارزميات الاستكشاف مثل BFS و DFS للإجابة عن السؤال المحوري: «إذا اشتبهنا بجهاز معين، فكيف نعرف كافة الأجهزة المرتبطة به؟»</p>
+</section>
+
+<section id="objectives">
+<h2>2. الأهداف الرئيسية</h2>
+<ul>
+  <li>تعريف الرسم البياني ومكوناته (العقد والحواف).</li>
+  <li>التمييز بين الحواف الموجّهة وغير الموجّهة في الشبكات.</li>
+  <li>توضيح كيف يساعد المسار البياني في تتبع الحركة الجانبية للمهاجم.</li>
+  <li>مقارنة خوارزميتي BFS و DFS واستخداماتهما السيبرانية.</li>
+  <li>تنفيذ مثال عملي بلغة بايثون وبيان حدود هذه الطريقة.</li>
+</ul>
+</section>
+
+<section id="basics">
+<h2>3. أساسيات الرسوم البيانية في الشبكات (Graph Basics)</h2>
+<p>الرسم البياني (Graph) هو هيكل بيانات رياضي غير خطي يتكون من عنصرين رئيسيين يعكسان واقع البنية التحتية لتكنولوجيا المعلومات:</p>
+<ul>
+  <li><strong>العقدة (Node / Vertex):</strong> تمثل الكيانات الفردية داخل الشبكة، مثل الأجهزة الشخصية والخوادم (Servers) وقواعد البيانات أو حتى المستخدمين.</li>
+  <li><strong>الحافة (Edge):</strong> تمثل الاتصال أو خط ارتباط البيانات والعلاقة بين عقدتين.</li>
+</ul>
+<h3>3.1 أنواع الحواف في الشبكات</h3>
+<ul>
+  <li><strong>اتصال بلا اتجاه (Undirected Graph):</strong> يعبّر عن اتصال ثنائي الاتجاه بين جهازين.</li>
+  <li><strong>حواف باتجاه محدد (Directed Graph):</strong> تعبّر عن تدفق البيانات أو الاتصالات في اتجاه واحد، مثل طلب إرسال من العميل إلى الخادم.</li>
+</ul>
+</section>
+
+<section id="representation">
+<h2>4. تمثيل الشبكة (Network Graph Representation)</h2>
+<p>من خلال دمج سجلات الاتصالات (Connection Logs) وقواعد بيانات الأصول (Asset Databases) يمكن تحويل البنية التحتية للمؤسسة إلى خارطة بيانية تُظهر مساراً افتراضياً يبدأ عادةً من محطة عمل مخترقة وينتهي بقاعدة بيانات حساسة:</p>
+<div class="diagram"><div class="flow">
+  <span class="node">Workstation A</span><span class="arrow">→</span>
+  <span class="node">Server B</span><span class="arrow">→</span>
+  <span class="node">Database C</span>
+</div></div>
+<p class="note"><strong>ملاحظة هامة:</strong> هذا الرسم يوضح علاقة ارتباط ومسار محتمل، ولا يُعتبر بحد ذاته دليلاً قاطعاً على وقوع اختراق دون تحقق أمني إضافي.</p>
+<h3>4.1 تمثيل الرسم في الذاكرة</h3>
+<p>الطريقة الشائعة هي <strong>قائمة الجوار (Adjacency List)</strong>: لكل عقدة قائمة بجيرانها، وتُنفَّذ في بايثون بقاموس (Dictionary) كما في القسم 7. وهي مناسبة للشبكات الكبيرة قليلة الاتصالات لأن مساحتها تتناسب مع عدد العقد والحواف.</p>
+</section>
+
+<section id="attack-path">
+<h2>5. تحليل مسار الهجوم (Attack Path Analysis)</h2>
+<p>عند تتبع حركة المهاجمين داخل الشبكة، يعتمد المحللون على تتبع مسارات <strong>الحركة الجانبية (Lateral Movement)</strong>، وهي التقنيات التي ينتقل بها المهاجم من جهاز إلى آخر بعد الاختراق الأولي. وجود مسار بياني (مثل المسار الافتراضي E → D → B → A) يتيح للفريق التركيز الفوري على الثغرات المحتملة بدلاً من البحث العشوائي في آلاف السجلات.</p>
+<div class="diagram"><div class="flow">
+  <span class="node">E</span><span class="arrow">→</span><span class="node">D</span><span class="arrow">→</span>
+  <span class="node">B</span><span class="arrow">→</span><span class="node">A</span>
+</div></div>
+<p><strong>الفائدة الاستراتيجية:</strong> تحديد العلاقات والمسارات الخفية التي تستحق التحقيق الفوري وحماية الأصول الحساسة قبل تفاقم الحادث الأمني.</p>
+</section>
+
+<section id="algorithms">
+<h2>6. خوارزميات الاستكشاف (BFS و DFS)</h2>
+<p>لاستكشاف العقد والاتصالات داخل الرسم البياني للشبكة نستخدم خوارزميتين أساسيتين في هياكل البيانات:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>الخوارزمية</th><th>آلية العمل والخصائص</th><th>الاستخدام السيبراني</th></tr></thead>
+<tbody>
+<tr><td>BFS<br>(Breadth-First Search)</td><td>تستكشف الجيران الأقرب أولاً مستوى بمستوى، وتعتمد على هيكل الطابور (Queue).</td><td>مثالية لإيجاد أقصر مسار بعدد الحواف في شبكة غير موزونة (أقل عدد قفزات للوصول إلى الهدف).</td></tr>
+<tr><td>DFS<br>(Depth-First Search)</td><td>تتعمق في مسار واحد بالكامل قبل الرجوع، وتعتمد على المكدس (Stack) أو الاستدعاء الذاتي.</td><td>ممتازة لاستكشاف كافة الفروع والمسارات المحتملة التي سلكها المهاجم داخل النظام.</td></tr>
+</tbody></table></div>
+<p>تبلغ كلفة الخوارزميتين <code>O(V + E)</code> عند استخدام قائمة الجوار، حيث V عدد العقد و E عدد الحواف، أي أن كلاً منهما يزور كل عقدة وكل حافة مرة واحدة تقريباً.</p>
+</section>
+
+<section id="python">
+<h2>7. تطبيق عملي بلغة بايثون (Python Implementation)</h2>
+<p>المثال التالي يستخدم BFS لاستكشاف الأجهزة المتصلة، ويتجنب التكرار باستخدام القاموس وقائمة الانتظار ومجموعة الزيارة:</p>
+<pre><code>from collections import deque
+
+graph = {
+    "Workstation A": ["Server B", "Laptop D"],
+    "Server B": ["Database C"],
+    "Laptop D": ["Server B"],
+    "Database C": [],
+}
+
+def bfs(graph, start):
+    seen = {start}
+    queue = deque([start])
+    while queue:
+        node = queue.popleft()
+        print(f"Visited: {node}")
+        for neighbor in graph[node]:
+            if neighbor not in seen:
+                seen.add(neighbor)
+                queue.append(neighbor)
+
+bfs(graph, "Workstation A")
+# Visited: Workstation A
+# Visited: Server B
+# Visited: Laptop D
+# Visited: Database C</code></pre>
+<h3>7.1 إيجاد أقصر مسار بين جهازين</h3>
+<p>بتسجيل «الأب» (parent) لكل عقدة يمكن إعادة بناء المسار من نقطة الاشتباه إلى الأصل الحساس:</p>
+<pre><code>def shortest_path(graph, start, target):
+    parent = {start: None}
+    queue = deque([start])
+    while queue:
+        node = queue.popleft()
+        if node == target:
+            path = []
+            while node is not None:
+                path.append(node)
+                node = parent[node]
+            return path[::-1]
+        for neighbor in graph[node]:
+            if neighbor not in parent:
+                parent[neighbor] = node
+                queue.append(neighbor)
+    return None    # لا يوجد مسار
+
+print(shortest_path(graph, "Workstation A", "Database C"))
+# ['Workstation A', 'Server B', 'Database C']</code></pre>
+<h3>7.2 نسخة DFS</h3>
+<pre><code>def dfs(graph, node, seen=None):
+    if seen is None:
+        seen = set()
+    seen.add(node)
+    print(f"Visited: {node}")
+    for neighbor in graph[node]:
+        if neighbor not in seen:
+            dfs(graph, neighbor, seen)
+    return seen
+
+dfs(graph, "Workstation A")
+# ترتيب الزيارة: A ثم B ثم C ثم D</code></pre>
+</section>
+
+<section id="uses">
+<h2>8. الاستخدامات والحدود في الأمن السيبراني</h2>
+<p>تُستخدم الرسوم البيانية على نطاق واسع في البحث عن التهديدات (Threat Hunting) والاستجابة للحوادث (Incident Response) لفهم الروابط والأنماط المشبوهة. غير أن دقة النتائج تبقى رهناً بدقة السجلات المستخرجة وجودة تعريف الحواف والسياق الأمني المحيط.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>الفوائد</th><th>الحدود</th></tr></thead>
+<tbody>
+<tr><td>تحديد الأجهزة المرتبطة بجهاز مشتبه به بسرعة</td><td>تعتمد على جودة السجلات؛ سجل ناقص يعني حافة مفقودة</td></tr>
+<tr><td>إيجاد أقصر مسار نحو الأصول الحساسة</td><td>وجود مسار لا يعني أن الهجوم مرّ منه فعلاً</td></tr>
+<tr><td>توجيه التحقيق بدل البحث العشوائي</td><td>تتطلب تعريفاً صحيحاً لما يُعد حافة (اتصال، جلسة، صلاحية)</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="conclusion">
+<h2>9. الخاتمة</h2>
+<p>الرسوم البيانية تدعم التحقيق وتسهّل كشف مسارات الاختراق، إذ تحوّل شبكة معقدة من السجلات إلى خارطة يمكن استكشافها بخوارزميات BFS و DFS. لكنها وحدها لا تثبت الهجوم بالكامل دون أدلة جنائية رقمية (Digital Forensics) مكمّلة.</p>
+</section>
+
+<section id="references">
+<h2>10. المراجع</h2>
+<ol dir="ltr" style="text-align:left">
+  <li>Cormen, T. H., Leiserson, C. E., Rivest, R. L., and Stein, C. (2022). <em>Introduction to Algorithms</em>, 4th ed. MIT Press. Chapter 20: Elementary Graph Algorithms.</li>
+  <li>Sedgewick, R., and Wayne, K. (2011). <em>Algorithms</em>, 4th ed. Addison-Wesley. Chapter 4: Graphs.</li>
+  <li>MITRE. <em>ATT&amp;CK: Lateral Movement (TA0008)</em>. attack.mitre.org/tactics/TA0008/</li>
+  <li>Cichonski, P., Millar, T., Grance, T., and Scarfone, K. (2012). <em>Computer Security Incident Handling Guide</em> (NIST SP 800-61 Rev. 2). National Institute of Standards and Technology.</li>
+  <li>Python Software Foundation. <em>Python Documentation: collections.deque</em>. docs.python.org.</li>
+</ol>
+<p class="note">يُرجى مطابقة بيانات الطبعات والصفحات مع مكتبة الجامعة قبل التسليم النهائي.</p>
+</section>
+</main>
+
+<footer>علي حسن علي • فرقد حبيب عبدالله هادي — جامعة المستقبل — كلية العلوم — علوم الأمن السيبراني</footer>
+</body>
+</html>
